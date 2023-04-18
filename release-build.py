@@ -12,7 +12,7 @@ build_options = ['help', 'release', 'r-mode-3']
 
 def main():
 	layout = [
-				[sg.Output(size=(50,30), background_color='black', text_color='white')],
+				[sg.Output(size=(30,20), background_color='black', text_color='white')],
 #				[sg.T('Promt> '), sg.Input(key='-IN-', do_not_clear=False)],
                 [sg.Radio('help', "opt", key='opt-help'),
 				 sg.Radio('clean', "opt", key='opt-clean'),
