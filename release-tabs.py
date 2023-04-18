@@ -5,55 +5,71 @@
 import subprocess
 import sys
 import PySimpleGUI as sg
+from PySimpleGUI.PySimpleGUI import theme_border_width
 
 sg.theme('Dark Blue 3')
 
 build_options = ['help', 'release', 'r-mode-3']
 
 icv_layout = [[sg.Text("icv-release")],
-			  [sg.Radio('help', "opt", key='opt-help')],
-			  [sg.Radio('docs', "opt", key='opt-docs')],
-			  [sg.Radio('boot', "opt", key='opt-boot')],
 			  [sg.Text('build'),sg.Input(size=(12,1), key='-IN-')],
-			  [sg.Radio('burn', "opt", key='opt-burn')],
-			  [sg.Radio('prov', "opt", key='opt-prov')],
-			  [sg.Radio('time', "opt", key='opt-time')],
-			  [sg.Radio('clean',"opt", key='opt-clean')],
-			  [sg.Radio('spell',"opt", key='opt-spell')],
-			  [sg.Radio('hexon',"opt", key='opt-hexon')],
-			  [sg.Radio('manoff',"opt", key='opt-manoff')],
 			  [sg.Text('platform'),sg.Input(size=(12,1), key='-IN-TAB1-')],
-			  [sg.Radio('release',"opt", key='opt-release')],
-			  [sg.Radio('tar',  "opt", key='opt-tar' )],
+			  [sg.Checkbox('help',  key='opt-help')],
+			  [sg.Checkbox('docs',  key='opt-docs')],
+			  [sg.Checkbox('boot',  key='opt-boot',default=True)],
+			  [sg.Checkbox('burn',  key='opt-burn',default=True)],
+			  [sg.Checkbox('prov',  key='opt-prov',default=True)],
+			  [sg.Checkbox('time',  key='opt-time')],
+			  [sg.Checkbox('clean', key='opt-clean')],
+			  [sg.Checkbox('spell', key='opt-spell',default=True)],
+			  [sg.Checkbox('hexon', key='opt-hexon')],
+			  [sg.Checkbox('manoff',key='opt-manoff')],
+			  [sg.Checkbox('release',key='opt-release')],
+			  [sg.Checkbox('tar', key='opt-tar' )],
 			]
-oem_layout = [[sg.Text('oem')]]
-srv_layout = [[sg.Text('Services')]]
 
-tab_group_layout = [[sg.Tab('ICV',icv_layout,key='-ICV-'),
-					 sg.Tab('OEM',oem_layout,key='-OEM-'),
-					 sg.Tab('SRV',srv_layout,key='-SRV-')
+oem_layout = [[sg.Text('Application Release')],
+			  [sg.Text('build'),sg.Input(size=(12,1), key='-IN-')],
+			  [sg.Checkbox('executable', key='opt-exe')],
+			  [sg.Checkbox('time',  key='opt-time')],
+			  [sg.Checkbox('spell', key='opt-spell',default=True)],
+			  [sg.Checkbox('hexon', key='opt-hexon')],
+			  [sg.Checkbox('tar',   key='opt-tar' )],
+			]
+
+srv_layout = [[sg.Text('Services')],
+			  [sg.Text('build'),sg.Input(size=(12,1), key='-IN-')],
+			  [sg.Checkbox('help', key='opt-help',default=False)],
+			  [sg.Checkbox('time', key='opt-time',default=False)],
+			  [sg.Checkbox('clean',key='opt-clean',default=False)],
+			  [sg.Checkbox('tar',  key='opt-tar' ,default=False)],
+			]
+
+tab_group_layout = [[sg.Tab('ALIF (ICV)',icv_layout,
+						    key='-ICV-',
+						    font='Courier 15',
+						    border_width=15,
+						    tooltip='ICV Release'),
+					 sg.Tab('Application (OEM)',oem_layout,key='-OEM-',
+						    tooltip='APP release'),
+					 sg.Tab('Service (SRV)',srv_layout,key='-SRV-'),
+					 sg.Button('Close')
 				   ]]
 tab_keys = ('-ICV-', '-OEM-', '-SRV-')
 
 def main():
-	layout1 = [
-				[sg.Output(size=(50,30), background_color='black', text_color='white')],
-#				[sg.T('Promt> '), sg.Input(key='-IN-', do_not_clear=False)],
-                [sg.Radio('help', "opt", key='opt-help'),
-				 sg.Radio('clean', "opt", key='opt-clean'),
-                 sg.Radio('EXE', "opt", key='opt-exe')
-                ],
-				[sg.Button('Run', bind_return_key=True), sg.Button('Exit')],
-				]
 	layout = [[sg.TabGroup(tab_group_layout,
 				           enable_events=True,
+				           size=(400,500),
 				           key='-TABGROUP-')]]
-	window = sg.Window('ALIF SE Release Builder', layout)
+	window = sg.Window("ALIF SE Release Builder", layout, finalize=True,)
 
 	while True:             # Event Loop
 		event, values = window.read()
 		# print(event, values)
-		if event in (sg.WIN_CLOSED, 'Exit'):
+		if event in (sg.WIN_CLOSED, 'Exit', 'Close'):
+			break
+		if event == 'Close':
 			break
 		if event == 'Visible':
 			 window[tab_keys[int(values['-IN-'])-1]].update(visible=False)
