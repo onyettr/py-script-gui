@@ -70,8 +70,20 @@ do
   shift   
 done
 
+function generate_seram()
+{
+    make clean
+    make ${PARALLEL_TASKS} DEVICE_TYPE=SPARK PLATFORM_TYPE=FPGA RELEASE_BUILD=$RELEASE_BUILD_PARAM
+    if [[ $? -ne 0 ]]
+    then
+        exit 1
+    fi
+}
+
 echo "Verbose Mode       $VERSBOSE_MODE  "
 echo "Quiet Mode         $QUIET_MODE     "
 echo "Information level  $INFO_LEVEL     "
 echo "Input Filename     $INPUT_FILENAME "
 echo "Output Filename    $OUTPUT_FILENAME"
+
+generate_seram

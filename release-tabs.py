@@ -7,11 +7,14 @@ import sys
 import PySimpleGUI as sg
 from PySimpleGUI.PySimpleGUI import theme_border_width
 
-sg.theme('Dark Blue 3')
+font = ('Helvetica',12)
+
+sg.theme('Dark Blue 2')
+sg.set_options(font=font)
 
 build_options = ['help', 'release', 'r-mode-3']
 
-icv_layout = [[sg.Text("icv-release")],
+icv_layout = [
 			  [sg.Text('build'),sg.Input(size=(12,1), key='-IN-')],
 			  [sg.Text('platform'),sg.Input(size=(12,1), key='-IN-TAB1-')],
 			  [sg.Checkbox('help',  key='opt-help')],
@@ -28,7 +31,7 @@ icv_layout = [[sg.Text("icv-release")],
 			  [sg.Checkbox('tar', key='opt-tar' )],
 			]
 
-oem_layout = [[sg.Text('Application Release')],
+oem_layout = [
 			  [sg.Text('build'),sg.Input(size=(12,1), key='-IN-')],
 			  [sg.Checkbox('executable', key='opt-exe')],
 			  [sg.Checkbox('time',  key='opt-time')],
@@ -37,7 +40,7 @@ oem_layout = [[sg.Text('Application Release')],
 			  [sg.Checkbox('tar',   key='opt-tar' )],
 			]
 
-srv_layout = [[sg.Text('Services')],
+srv_layout = [
 			  [sg.Text('build'),sg.Input(size=(12,1), key='-IN-')],
 			  [sg.Checkbox('help', key='opt-help',default=False)],
 			  [sg.Checkbox('time', key='opt-time',default=False)],
@@ -53,15 +56,21 @@ tab_group_layout = [[sg.Tab('ALIF (ICV)',icv_layout,
 					 sg.Tab('Application (OEM)',oem_layout,key='-OEM-',
 						    tooltip='APP release'),
 					 sg.Tab('Service (SRV)',srv_layout,key='-SRV-'),
-					 sg.Button('Close')
+					 sg.Button('Close'),
+					 sg.Button('Run')
 				   ]]
 tab_keys = ('-ICV-', '-OEM-', '-SRV-')
 
 def main():
-	layout = [[sg.TabGroup(tab_group_layout,
+	layout = [
+				[sg.Output(size=(80,20), 
+						   background_color='black', 
+						   text_color='white')],
+				[sg.TabGroup(tab_group_layout,
 				           enable_events=True,
-				           size=(400,500),
-				           key='-TABGROUP-')]]
+				           size=(500,500),
+				           key='-TABGROUP-')]
+             ]
 	window = sg.Window("ALIF SE Release Builder", layout, finalize=True,)
 
 	while True:             # Event Loop
@@ -79,9 +88,9 @@ def main():
 			 window[tab_keys[int(values['-IN-'])-1]].select()
 		if event == 'Disable':
 			 window[tab_keys[int(values['-IN-'])-1]].update(disabled=True)
-#		elif event == 'Run':
-#			runCommand(cmd=values['-IN-'], window=window)
-#			runCommand(cmd='/usr/bin/bash argc.sh -h', window=window)
+		if event == 'Run':
+			runCommand(cmd='bash argc.sh -h', window=window)
+
 	window.close()
 
 def runCommand(cmd, timeout=None, window=None):
