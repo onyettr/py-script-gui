@@ -14,52 +14,48 @@ sg.set_options(font=font)
 
 build_options = ['help', 'release', 'r-mode-3']
 
-icv_cb_layout = []
-
-icv_cb_layout.append(sg.Checkbox('help',key='opt-help'))
-icv_cb_layout.append(sg.Checkbox('docs',key='opt-docs'))
-icv_cb_layout.append(sg.Checkbox('boot',key='opt-boot',default=True))
-icv_cb_layout.append(sg.Checkbox('burn',key='opt-burn',default=True))
-icv_cb_layout.append(sg.Checkbox('prov',key='opt-prov',default=True))
-		
 icv_layout = [
-			  [sg.Text('build'),sg.Input(size=(12,1), key='-IN-')],
-			  [sg.Text('platform'),sg.Input(size=(12,1), key='-IN-TAB1-')],
-			  [sg.Checkbox('help',key='opt-help'),
-			   sg.Checkbox('docs',key='opt-docs'),
+			  [
+				sg.Text('build   '),sg.Input('B0',size=(12,1), key='-IN-'),
+			    sg.Text('platform'),sg.Input('EVALUATION_BOARD',size=(22,1), key='-IN-TAB1-')
+			  ],
+			  [
+#			   sg.Checkbox('help',key='opt-help'),
+			   sg.Checkbox('docs', key='opt-docs'),
 			   sg.Checkbox('boot', key='opt-boot',default=True),
 			   sg.Checkbox('burn', key='opt-burn',default=True),
 			   sg.Checkbox('prov', key='opt-prov',default=True),
 			   sg.Checkbox('time', key='opt-time'),
 			   sg.Checkbox('clean',key='opt-clean'),
-			   sg.Checkbox('spell',key='opt-spell',default=True)],
-			  [sg.Checkbox('hexon',key='opt-hexon'),
+			   sg.Checkbox('spell',key='opt-spell',default=True),
+			   sg.Checkbox('tar',  key='opt-tar' )
+			  ],
+			  [sg.Checkbox('hexon', key='opt-hexon'),
 			   sg.Checkbox('manoff',key='opt-manoff'),
-			   sg.Checkbox('release',key='opt-release'),
-			   sg.Checkbox('tar', key='opt-tar' )]
-			]
-
-icv_layout1 = [
-			  [sg.Text('build'),sg.Input(size=(12,1), key='-IN-')],
-			  [sg.Text('platform'),sg.Input(size=(12,1), key='-IN-TAB1-')],
-	          [icv_cb_layout]
+			   sg.Checkbox('release',key='opt-release')
+			  ]
 			]
 
 oem_layout = [
-			  [sg.Text('build'),sg.Input(size=(12,1), key='-IN-')],
-			  [sg.Checkbox('executable', key='opt-exe')],
-			  [sg.Checkbox('time',  key='opt-time')],
-			  [sg.Checkbox('spell', key='opt-spell',default=True)],
-			  [sg.Checkbox('hexon', key='opt-hexon')],
-			  [sg.Checkbox('tar',   key='opt-tar' )],
+			  [sg.Text('build'),sg.Input("B0",size=(12,1), key='-IN-')],
+			  [
+			   sg.Checkbox('executable', key='opt-exe'),
+			   sg.Checkbox('time',  key='opt-time'),
+			   sg.Checkbox('spell', key='opt-spell',default=True),
+			   sg.Checkbox('hexon', key='opt-hexon'),
+			   sg.Checkbox('tar',   key='opt-tar' )
+			  ]
 			]
 
 srv_layout = [
-			  [sg.Text('build'),sg.Input(size=(12,1), key='-IN-')],
-			  [sg.Checkbox('help', key='opt-help',default=False)],
-			  [sg.Checkbox('time', key='opt-time',default=False)],
-			  [sg.Checkbox('clean',key='opt-clean',default=False)],
-			  [sg.Checkbox('tar',  key='opt-tar' ,default=False)],
+			  [sg.Text('build'),sg.Input("B0",size=(12,1), key='-IN-')],
+			
+			  [
+#			   sg.Checkbox('help', key='opt-help',default=False),
+			   sg.Checkbox('time', key='opt-time',default=False),
+			   sg.Checkbox('clean',key='opt-clean',default=False),
+			   sg.Checkbox('tar',  key='opt-tar' ,default=False)
+			 ]
 			]
 
 tab_group_layout = [[sg.Tab('ALIF (ICV)',
@@ -86,7 +82,7 @@ def main():
 						   text_color='white')],
 				[sg.TabGroup(tab_group_layout,
 				           enable_events=True,
-				           size=(800,300),
+				           size=(900,146),
 				           key='-TABGROUP-')]
              ]
 	window = sg.Window("ALIF SE Release Builder", layout, finalize=True,)
