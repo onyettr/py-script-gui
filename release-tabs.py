@@ -17,33 +17,34 @@ build_options = ['help', 'release', 'r-mode-3']
 icv_layout = [
 			  [
 				sg.Text('build   '),sg.Input('B0',size=(12,1), key='-IN-'),
-			    sg.Text('platform'),sg.Input('EVALUATION_BOARD',size=(22,1), key='-IN-TAB1-')
+			    sg.Text('platform'),sg.Input('EVALUATION_BOARD',
+											  size=(22,1), key='-IN-TAB1-')
 			  ],
 			  [
 #			   sg.Checkbox('help',key='opt-help'),
-			   sg.Checkbox('docs', key='opt-docs'),
-			   sg.Checkbox('boot', key='opt-boot',default=True),
-			   sg.Checkbox('burn', key='opt-burn',default=True),
-			   sg.Checkbox('prov', key='opt-prov',default=True),
-			   sg.Checkbox('time', key='opt-time'),
-			   sg.Checkbox('clean',key='opt-clean'),
-			   sg.Checkbox('spell',key='opt-spell',default=True),
-			   sg.Checkbox('tar',  key='opt-tar' )
+			   sg.Checkbox('docs',   key='-icv-docs-', default=False),
+			   sg.Checkbox('boot',   key='-icv-boot-', default=True),
+			   sg.Checkbox('burn',   key='-icv-burn-', default=True),
+			   sg.Checkbox('prov',   key='-icv-prov-', default=True),
+			   sg.Checkbox('time',   key='-icv-time-', default=False),
+			   sg.Checkbox('clean',  key='-icv-clean-',default=False),
+			   sg.Checkbox('spell',  key='-icv-spell-',default=True),
+			   sg.Checkbox('tar',    key='-icv-tar-',  default=False)
 			  ],
-			  [sg.Checkbox('hexon', key='opt-hexon'),
-			   sg.Checkbox('manoff',key='opt-manoff'),
-			   sg.Checkbox('release',key='opt-release')
+			  [sg.Checkbox('hexon',  key='-icv-hexon-',default=False),
+			   sg.Checkbox('manoff', key='-icv-manoff-',default=False),
+			   sg.Checkbox('release',key='opt-release',default=False)
 			  ]
 			]
 
 oem_layout = [
 			  [sg.Text('build'),sg.Input("B0",size=(12,1), key='-IN-')],
 			  [
-			   sg.Checkbox('executable', key='opt-exe'),
-			   sg.Checkbox('time',  key='opt-time'),
-			   sg.Checkbox('spell', key='opt-spell',default=True),
-			   sg.Checkbox('hexon', key='opt-hexon'),
-			   sg.Checkbox('tar',   key='opt-tar' )
+			   sg.Checkbox('executable', key='-oem-exe-',default=False),
+			   sg.Checkbox('time',  key='-oem-time-',default=False),
+			   sg.Checkbox('spell', key='-oem-spell-',default=True),
+			   sg.Checkbox('hexon', key='-oem-hexon-',default=False),
+			   sg.Checkbox('tar',   key='-oem-tar-',default=False)
 			  ]
 			]
 
@@ -52,9 +53,9 @@ srv_layout = [
 			
 			  [
 #			   sg.Checkbox('help', key='opt-help',default=False),
-			   sg.Checkbox('time', key='opt-time',default=False),
-			   sg.Checkbox('clean',key='opt-clean',default=False),
-			   sg.Checkbox('tar',  key='opt-tar' ,default=False)
+			   sg.Checkbox('time', key='-srv-time-',default=False),
+			   sg.Checkbox('clean',key='-srv-clean-',default=False),
+			   sg.Checkbox('tar',  key='-srv-tar-' ,default=False)
 			 ]
 			]
 
@@ -75,6 +76,20 @@ tab_group_layout = [[sg.Tab('ALIF (ICV)',
 				   ]]
 tab_keys = ('-ICV-', '-OEM-', '-SRV-')
 
+#class icv_options:
+#def __init__(self):
+#		self.icv-docs=False
+#		self.icv-boot=False
+#		self.icv-burn=True
+#		self.icv-prov=True
+#		self.icv-time=False
+#		self.icv-clean=False
+#		self.icv-spell=True
+#		self.icv-tar=False
+#		self.icv-hexon=False
+#		self.icv-manoff=False
+#		self.icv-release=False
+
 def main():
 	layout = [
 				[sg.Output(size=(80,20), 
@@ -86,10 +101,11 @@ def main():
 				           key='-TABGROUP-')]
              ]
 	window = sg.Window("ALIF SE Release Builder", layout, finalize=True,)
-
+	print("about to loop..")
 	while True:             # Event Loop
 		event, values = window.read()
-		# print(event, values)
+		print(event)
+		print(values)
 		if event in (sg.WIN_CLOSED, 'Exit', 'Close'):
 			break
 		if event == 'Close':
@@ -104,7 +120,9 @@ def main():
 			 window[tab_keys[int(values['-IN-'])-1]].update(disabled=True)
 		if event == 'Run':
 			runCommand(cmd='bash argc.sh -h', window=window)
-
+		if values['-icv-docs-']:
+			print("icv doc ENABLED")
+	
 	window.close()
 
 def runCommand(cmd, timeout=None, window=None):
