@@ -59,6 +59,18 @@ srv_layout = [
 			 ]
 			]
 
+test_release_layout = [
+			  [
+			   sg.Checkbox('time',   key='-test-time-', default=False),
+			   sg.Checkbox('clean',  key='-test-clean-',default=False),
+			   sg.Checkbox('spell',  key='-test-spell-',default=True),
+			   sg.Checkbox('tar',    key='-test-tar-',  default=False),
+			   sg.Checkbox('hexon',  key='-test-hexon-',default=False),
+			   sg.Checkbox('manoff', key='-test-manoff-',default=False),
+			   sg.Checkbox('suppress',key='opt-suppres',default=False)
+			  ]
+			]
+
 tab_group_layout = [[sg.Tab('ALIF (ICV)',
 						    icv_layout,
 						    key='-ICV-',
@@ -71,10 +83,13 @@ tab_group_layout = [[sg.Tab('ALIF (ICV)',
 					 sg.Tab('Service (SRV)',
 						    srv_layout,
 						    key='-SRV-'),
+					 sg.Tab('REV_B0 Test',
+						    test_release_layout,
+						    key='-TST-'),
 					 sg.Button('Close'),
 					 sg.Button('Run')
 				   ]]
-tab_keys = ('-ICV-', '-OEM-', '-SRV-')
+tab_keys = ('-ICV-', '-OEM-', '-SRV-', '-TST-')
 
 #class icv_options:
 #def __init__(self):
