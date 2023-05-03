@@ -89,21 +89,29 @@ tab_group_layout = [[sg.Tab('ALIF (ICV)',
 					 sg.Button('Close'),
 					 sg.Button('Run')
 				   ]]
+
+# TAB Menu options for each tool
 tab_keys = ('-ICV-', '-OEM-', '-SRV-', '-TST-')
 
-#class icv_options:
-#def __init__(self):
-#		self.icv-docs=False
-#		self.icv-boot=False
-#		self.icv-burn=True
-#		self.icv-prov=True
-#		self.icv-time=False
-#		self.icv-clean=False
-#		self.icv-spell=True
-#		self.icv-tar=False
-#		self.icv-hexon=False
-#		self.icv-manoff=False
-#		self.icv-release=False
+# TAB to script mapping
+script_dict = {
+		'-TST-' : "revb0_test_release.sh",
+		'-ICV-' : "icv-release.sh",
+		'-OEM-' : "oem-release.sh",
+		'-SRV-' : "host-services.sh"
+		}
+
+def determine_tab(tab_selection, tab_options):
+	"""
+		see which TAB is selected 
+	"""
+	tab_key = "-TABGROUP-"
+	which_script = ""
+	if tab_key in tab_options:
+ 		tool = tab_options.get(tab_key)
+ 		which_script = script_dict.get(tool)
+
+	return which_script
 
 def main():
 	layout = [
@@ -119,12 +127,15 @@ def main():
 	print("about to loop..")
 	while True:             # Event Loop
 		event, values = window.read()
-		print(event)
+		cmd_args = " "
+		print("Event = ", event)
 		print(values)
 		if event in (sg.WIN_CLOSED, 'Exit', 'Close'):
 			break
 		if event == 'Close':
 			break
+		if event == '-TABGROUP-':
+			run_script = determine_tab(event,values)
 		if event == 'Visible':
 			 window[tab_keys[int(values['-IN-'])-1]].update(visible=False)
 		if event == 'Invisible':
@@ -134,7 +145,7 @@ def main():
 		if event == 'Disable':
 			 window[tab_keys[int(values['-IN-'])-1]].update(disabled=True)
 		if event == 'Run':
-			runCommand(cmd='bash argc.sh -h', window=window)
+			runCommand(cmd=run_script + cmd_args, window=window)
 		if values['-icv-docs-']:
 			print("icv doc ENABLED")
 	
@@ -148,7 +159,11 @@ def runCommand(cmd, timeout=None, window=None):
 	@param window: the PySimpleGUI window that the output is going to (needed to do refresh on)
 	@return: (return code from command, command output)
 	"""
-	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	print("Run ", cmd)
+
+	p = subprocess.Popen(cmd, 
+						 shell=True, stdout=subprocess.PIPE, 
+						 stderr=subprocess.STDOUT)
 	output = ''
 	for line in p.stdout:
 		line = line.decode(errors='replace' if (sys.version_info) < (3, 5) else 'backslashreplace').rstrip()
