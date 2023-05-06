@@ -95,7 +95,7 @@ tab_keys = ('-ICV-', '-OEM-', '-SRV-', '-TST-')
 
 # TAB to script mapping
 script_dict = {
-		'-TST-' : "revb0_test_release.sh",
+		'-TST-' : "bash revb0_test_release.sh",
 		'-ICV-' : "icv-release.sh",
 		'-OEM-' : "oem-release.sh",
 		'-SRV-' : "host-services.sh"
@@ -113,6 +113,11 @@ def determine_tab(tab_selection, tab_options):
 
 	return which_script
 
+def get_test_options(tab_options):
+	"""
+		TST TAB selected - extract the options
+	"""
+
 def main():
 	layout = [
 				[sg.Output(size=(80,20), 
@@ -129,7 +134,8 @@ def main():
 		event, values = window.read()
 		cmd_args = " "
 		print("Event = ", event)
-		print(values)
+		print("Values=", values)
+
 		if event in (sg.WIN_CLOSED, 'Exit', 'Close'):
 			break
 		if event == 'Close':
@@ -145,12 +151,33 @@ def main():
 		if event == 'Disable':
 			 window[tab_keys[int(values['-IN-'])-1]].update(disabled=True)
 		if event == 'Run':
+#			args = values['-IN'].split(' ')
+#			print(args)
+#			execute_command_blocking(run_script, " -h")
 			runCommand(cmd=run_script + cmd_args, window=window)
 		if values['-icv-docs-']:
 			print("icv doc ENABLED")
 	
 	window.close()
 
+def execute_command_blocking(command, *args):
+    expanded_args = []
+    for a in args:
+        expanded_args.append(a)
+        # expanded_args += a
+    print("Running %s %s" %(command, expanded_args))
+    try:
+        sp = subprocess.Popen([command, expanded_args], shell=True,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = sp.communicate()
+        if out:
+            print(out.decode("utf-8"))
+        if err:
+            print(err.decode("utf-8"))
+    except:
+        out = ''
+    return out
+ 
 def runCommand(cmd, timeout=None, window=None):
 	nop = None
 	""" run shell command
