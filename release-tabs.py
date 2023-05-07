@@ -67,10 +67,12 @@ test_release_layout = [
 			   sg.Checkbox('tar',    key='-test-tar-',  default=False),
 			   sg.Checkbox('hexon',  key='-test-hexon-',default=False),
 			   sg.Checkbox('manoff', key='-test-manoff-',default=False),
-			   sg.Checkbox('suppress',key='opt-suppres',default=False)
+			   sg.Checkbox('suppress',key='-test-suppress-',default=False),
+			   sg.Checkbox('version',key='-test-version-',default=False)
 			  ]
 			]
 
+# TAB menu layout
 tab_group_layout = [[sg.Tab('ALIF (ICV)',
 						    icv_layout,
 						    key='-ICV-',
@@ -83,7 +85,7 @@ tab_group_layout = [[sg.Tab('ALIF (ICV)',
 					 sg.Tab('Service (SRV)',
 						    srv_layout,
 						    key='-SRV-'),
-					 sg.Tab('REV_B0 Test',
+					 sg.Tab('REV_B0 Bringup',
 						    test_release_layout,
 						    key='-TST-'),
 					 sg.Button('Close'),
@@ -103,7 +105,7 @@ script_dict = {
 
 def determine_tab(tab_selection, tab_options):
 	"""
-		see which TAB is selected 
+		see which TAB is selected - this could be done better
 	"""
 	tab_key = "-TABGROUP-"
 	which_script = ""
@@ -113,10 +115,34 @@ def determine_tab(tab_selection, tab_options):
 
 	return which_script
 
-def get_test_options(tab_options):
+def get_test_options(tst_options):
 	"""
 		TST TAB selected - extract the options
 	"""
+	args = ''
+	print(type(tst_options))
+#	print("TST Options= ", tst_options)
+
+	if tst_options['-test-time-']:
+		args += ' -ts'
+	if tst_options['-test-clean-']:
+		args += ' -cl'
+	if tst_options['-test-spell-']:
+		args += ' -c'
+	if tst_options['-test-tar-']:
+		args += ' -t'
+	if tst_options['-test-manoff-']:
+		args += ' -mo'
+	if tst_options['-test-version-']:
+		args += ' -v'
+	if tst_options['-test-hexon-']:
+		args += ' -hx'
+	if tst_options['-test-suppress-']:
+		args += ' -zb'
+	if tst_options['-test-version-']:
+		args += ' -v'
+
+	return args
 
 def main():
 	layout = [
@@ -142,6 +168,7 @@ def main():
 			break
 		if event == '-TABGROUP-':
 			run_script = determine_tab(event,values)
+			print("Which group ", values[event])
 		if event == 'Visible':
 			 window[tab_keys[int(values['-IN-'])-1]].update(visible=False)
 		if event == 'Invisible':
@@ -151,9 +178,8 @@ def main():
 		if event == 'Disable':
 			 window[tab_keys[int(values['-IN-'])-1]].update(disabled=True)
 		if event == 'Run':
-#			args = values['-IN'].split(' ')
-#			print(args)
-#			execute_command_blocking(run_script, " -h")
+			cmd_args = get_test_options(values)
+			print("Cmd line = ", cmd_args)
 			runCommand(cmd=run_script + cmd_args, window=window)
 		if values['-icv-docs-']:
 			print("icv doc ENABLED")
