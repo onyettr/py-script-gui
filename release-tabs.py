@@ -16,59 +16,65 @@ build_options = ['help', 'release', 'r-mode-3']
 
 icv_layout = [
 			  [
-				sg.Text('build   '),sg.Input('B0',size=(12,1), key='-IN-'),
+				sg.Text('build   '),sg.Input('B0',
+						size=(12,1), key='-icv-build-'),
 			    sg.Text('platform'),sg.Input('EVALUATION_BOARD',
-											  size=(22,1), key='-IN-TAB1-')
+ 						size=(22,1), key='-icv-platform-')
 			  ],
 			  [
 #			   sg.Checkbox('help',key='opt-help'),
+			   sg.Checkbox('clean',  key='-icv-clean-',default=False),
 			   sg.Checkbox('docs',   key='-icv-docs-', default=False),
 			   sg.Checkbox('boot',   key='-icv-boot-', default=True),
 			   sg.Checkbox('burn',   key='-icv-burn-', default=True),
 			   sg.Checkbox('prov',   key='-icv-prov-', default=True),
 			   sg.Checkbox('time',   key='-icv-time-', default=False),
-			   sg.Checkbox('clean',  key='-icv-clean-',default=False),
 			   sg.Checkbox('spell',  key='-icv-spell-',default=True),
 			   sg.Checkbox('tar',    key='-icv-tar-',  default=False)
 			  ],
 			  [sg.Checkbox('hexon',  key='-icv-hexon-',default=False),
 			   sg.Checkbox('manoff', key='-icv-manoff-',default=False),
-			   sg.Checkbox('release',key='opt-release',default=False)
+			   sg.Checkbox('release',key='-icv-release-',default=False),
+			   sg.Checkbox('version',key='-icv-version-',default=False)
 			  ]
 			]
 
 oem_layout = [
 			  [sg.Text('build'),sg.Input("B0",size=(12,1), key='-IN-')],
 			  [
-			   sg.Checkbox('executable', key='-oem-exe-',default=False),
+			   sg.Checkbox('boot', key='-oem-bootc-',default=True),
+			   sg.Checkbox('provision', key='-oem-prov-',default=False),
+			   sg.Checkbox('executable', key='-oem-exec-',default=False),
 			   sg.Checkbox('time',  key='-oem-time-',default=False),
 			   sg.Checkbox('spell', key='-oem-spell-',default=True),
 			   sg.Checkbox('hexon', key='-oem-hexon-',default=False),
-			   sg.Checkbox('tar',   key='-oem-tar-',default=False)
+			   sg.Checkbox('tar',   key='-oem-tar-',default=False),
+			   sg.Checkbox('version',   key='-oem-version-',default=False),
+			   sg.Checkbox('suppress', key='-oem-suppress-',default=False),
 			  ]
 			]
 
 srv_layout = [
 			  [sg.Text('build'),sg.Input("B0",size=(12,1), key='-IN-')],
-			
 			  [
 #			   sg.Checkbox('help', key='opt-help',default=False),
 			   sg.Checkbox('time', key='-srv-time-',default=False),
 			   sg.Checkbox('clean',key='-srv-clean-',default=False),
-			   sg.Checkbox('tar',  key='-srv-tar-' ,default=False)
+			   sg.Checkbox('tar',  key='-srv-tar-' ,default=False),
+			   sg.Checkbox('version',  key='-srv-version-' ,default=False)
 			 ]
 			]
 
 test_release_layout = [
 			  [
-			   sg.Checkbox('time',   key='-test-time-', default=False),
-			   sg.Checkbox('clean',  key='-test-clean-',default=False),
-			   sg.Checkbox('spell',  key='-test-spell-',default=True),
-			   sg.Checkbox('tar',    key='-test-tar-',  default=False),
-			   sg.Checkbox('hexon',  key='-test-hexon-',default=False),
-			   sg.Checkbox('manoff', key='-test-manoff-',default=False),
+			   sg.Checkbox('time',    key='-test-time-', default=False),
+			   sg.Checkbox('clean',   key='-test-clean-',default=False),
+			   sg.Checkbox('spell',   key='-test-spell-',default=True),
+			   sg.Checkbox('tar',     key='-test-tar-',  default=False),
+			   sg.Checkbox('hexon',   key='-test-hexon-',default=False),
+			   sg.Checkbox('manoff',  key='-test-manoff-',default=False),
+			   sg.Checkbox('version', key='-test-version-',default=False),
 			   sg.Checkbox('suppress',key='-test-suppress-',default=False),
-			   sg.Checkbox('version',key='-test-version-',default=False)
 			  ]
 			]
 
@@ -98,9 +104,9 @@ tab_keys = ('-ICV-', '-OEM-', '-SRV-', '-TST-')
 # TAB to script mapping
 script_dict = {
 		'-TST-' : "bash revb0_test_release.sh",
-		'-ICV-' : "icv-release.sh",
-		'-OEM-' : "oem-release.sh",
-		'-SRV-' : "host-services.sh"
+		'-ICV-' : "bash icv-release.sh",
+		'-OEM-' : "bash oem-release.sh",
+		'-SRV-' : "bash host-services.sh"
 		}
 
 def determine_tab(tab_selection, tab_options):
@@ -144,6 +150,85 @@ def get_test_options(tst_options):
 
 	return args
 
+def get_srv_options(srv_options):
+	"""
+		SRV TAB selected - extract the options
+	"""
+	args = ''
+	print(type(srv_options))
+
+	if srv_options['-srv-time-']:
+		args += ' -ts'
+	if srv_options['-srv-clean-']:
+		args += ' -cl'
+	if srv_options['-srv-tar-']:
+		args += ' -t'
+	if srv_options['-srv-version-']:
+		args += ' -v'
+
+	return args
+
+def get_oem_options(oem_options):
+	"""
+		OEM TAB selected - extract the options
+	"""
+	args = ''
+
+	if oem_options['-oem-prov-']:
+		args += ' -pr'
+	if oem_options['-oem-exec-']:
+		args += ' -e'
+	if oem_options['-oem-time-']:
+		args += ' -ts'
+	if oem_options['-oem-spell-']:
+		args += ' -c'
+	if oem_options['-oem-hexon-']:
+		args += ' -hx'
+	if oem_options['-oem-tar-']:
+		args += ' -t'
+	if oem_options['-oem-version-']:
+		args += ' -v'
+	if oem_options['-oem-suppress-']:
+		args += ' -zb'
+
+	return args
+
+def get_icv_options(icv_options):
+	"""
+		ICV TAB selected - extract the options
+	"""
+	args = ''
+	print(type(icv_options))
+
+	if icv_options['-icv-boot-']:
+		args += ' -bs'
+	if icv_options['-icv-docs-']:
+		args += ' d'
+	if icv_options['-icv-clean-']:
+		args += ' -cl'
+	if icv_options['-icv-burn-']:
+		args += ' -bu'
+	if icv_options['-icv-prov-']:
+		args += ' -pr'
+	if icv_options['-icv-tar-']:
+		args += ' -t'
+	if icv_options['-icv-time-']:
+		args += ' -ts'
+	if icv_options['-icv-spell-']:
+		args += ' -c'
+	if icv_options['-icv-release-']:
+		args += ' -r'
+	if icv_options['-icv-manoff-']:
+		args += ' -mo'
+	if icv_options['-icv-hexon-']:
+		args += ' -hx'
+	if icv_options['-icv-suppress-']:
+		args += ' -zb'
+	if icv_options['-icv-version-']:
+		args += ' -v'
+
+	return args
+
 def main():
 	layout = [
 				[sg.Output(size=(80,20), 
@@ -159,8 +244,8 @@ def main():
 	while True:             # Event Loop
 		event, values = window.read()
 		cmd_args = " "
-		print("Event = ", event)
-		print("Values=", values)
+#		print("Event = ", event)
+#		print("Values=", values)
 
 		if event in (sg.WIN_CLOSED, 'Exit', 'Close'):
 			break
@@ -178,12 +263,20 @@ def main():
 		if event == 'Disable':
 			 window[tab_keys[int(values['-IN-'])-1]].update(disabled=True)
 		if event == 'Run':
-			cmd_args = get_test_options(values)
-			print("Cmd line = ", cmd_args)
+			which_tab = values['-TABGROUP-']
+			print(which_tab)
+			if which_tab == "-TST-":
+				cmd_args = get_test_options(values)
+			elif which_tab == "-ICV-":
+				cmd_args = get_icv_options(values)
+			elif which_tab == "-SRV-":
+				cmd_args = get_srv_options(values)
+			elif which_tab == "-OEM-":
+				cmd_args = get_oem_options(values)
+			else:
+				print("[ERROR] Unkown TAB")
 			runCommand(cmd=run_script + cmd_args, window=window)
-		if values['-icv-docs-']:
-			print("icv doc ENABLED")
-	
+
 	window.close()
 
 def execute_command_blocking(command, *args):
@@ -212,7 +305,7 @@ def runCommand(cmd, timeout=None, window=None):
 	@param window: the PySimpleGUI window that the output is going to (needed to do refresh on)
 	@return: (return code from command, command output)
 	"""
-	print("Run ", cmd)
+	print("[INFO] Commandline: ", cmd)
 
 	p = subprocess.Popen(cmd, 
 						 shell=True, stdout=subprocess.PIPE, 
