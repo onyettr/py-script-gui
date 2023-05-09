@@ -6,6 +6,7 @@ import subprocess
 import sys
 import PySimpleGUI as sg
 from PySimpleGUI.PySimpleGUI import theme_border_width
+from certifi.__main__ import args
 
 font = ('Helvetica',14)
 
@@ -16,31 +17,37 @@ build_options = ['help', 'release', 'r-mode-3']
 
 icv_layout = [
 			  [
-				sg.Text('build   '),sg.Input('B0',
-						size=(12,1), key='-icv-build-'),
-			    sg.Text('platform'),sg.Input('EVALUATION_BOARD',
- 						size=(22,1), key='-icv-platform-')
+				sg.Text('build   '),
+#				sg.Input("",size=(12,1), key='-icv-build-'),
+#			    sg.Text('platform')
+#			    sg.Input("",
+# 						size=(22,1), key='-icv-platform-',
+# 						enable_events=True)
 			  ],
 			  [
-#			   sg.Checkbox('help',key='opt-help'),
-			   sg.Checkbox('clean',  key='-icv-clean-',default=False),
-			   sg.Checkbox('docs',   key='-icv-docs-', default=False),
-			   sg.Checkbox('boot',   key='-icv-boot-', default=True),
-			   sg.Checkbox('burn',   key='-icv-burn-', default=True),
-			   sg.Checkbox('prov',   key='-icv-prov-', default=True),
-			   sg.Checkbox('time',   key='-icv-time-', default=False),
-			   sg.Checkbox('spell',  key='-icv-spell-',default=True),
-			   sg.Checkbox('tar',    key='-icv-tar-',  default=False)
+				sg.Checkbox('clean',  key='-icv-clean-',default=False),
+				sg.Checkbox('docs',   key='-icv-docs-', default=False),
+				sg.Checkbox('boot',   key='-icv-boot-', default=True),
+				sg.Checkbox('burn',   key='-icv-burn-', default=True),
+				sg.Checkbox('prov',   key='-icv-prov-', default=True),
+				sg.Checkbox('time',   key='-icv-time-', default=False),
+				sg.Checkbox('spell',  key='-icv-spell-',default=True),
+				sg.Checkbox('tar',    key='-icv-tar-',  default=False)
 			  ],
-			  [sg.Checkbox('hexon',  key='-icv-hexon-',default=False),
-			   sg.Checkbox('manoff', key='-icv-manoff-',default=False),
-			   sg.Checkbox('release',key='-icv-release-',default=False),
-			   sg.Checkbox('version',key='-icv-version-',default=False)
+			  [
+				sg.Checkbox('hexon',  key='-icv-hexon-',default=False),
+				sg.Checkbox('manoff', key='-icv-manoff-',default=False),
+				sg.Checkbox('release',key='-icv-release-',default=False),
+				sg.Checkbox('version',key='-icv-version-',default=False)
 			  ]
 			]
 
 oem_layout = [
-			  [sg.Text('build'),sg.Input("B0",size=(12,1), key='-IN-')],
+			  [
+				sg.Text('build'),
+				sg.Input("",size=(12,1), key='-oem-build-',
+						enable_events=True)
+			  ],
 			  [
 			   sg.Checkbox('boot', key='-oem-bootc-',default=True),
 			   sg.Checkbox('provision', key='-oem-prov-',default=False),
@@ -55,7 +62,11 @@ oem_layout = [
 			]
 
 srv_layout = [
-			  [sg.Text('build'),sg.Input("B0",size=(12,1), key='-IN-')],
+			  [
+				sg.Text('build'),
+				sg.Input("",size=(12,1), key='-srv-build-',
+						enable_events=True)
+			  ],
 			  [
 #			   sg.Checkbox('help', key='opt-help',default=False),
 			   sg.Checkbox('time', key='-srv-time-',default=False),
@@ -155,8 +166,10 @@ def get_srv_options(srv_options):
 		SRV TAB selected - extract the options
 	"""
 	args = ''
-	print(type(srv_options))
+#	print(srv_options))
 
+	if srv_options['-srv-build-'] != "":
+		args += ' -b ' + srv_options['-srv-build-']
 	if srv_options['-srv-time-']:
 		args += ' -ts'
 	if srv_options['-srv-clean-']:
@@ -174,6 +187,8 @@ def get_oem_options(oem_options):
 	"""
 	args = ''
 
+	if oem_options['-oem-build-'] != "":
+		args += ' -b ' + oem_options['-oem-build-']
 	if oem_options['-oem-prov-']:
 		args += ' -pr'
 	if oem_options['-oem-exec-']:
@@ -198,8 +213,14 @@ def get_icv_options(icv_options):
 		ICV TAB selected - extract the options
 	"""
 	args = ''
-	print(type(icv_options))
+#	print(type(icv_options))
 
+	return args
+
+#	if icv_options['-icv-build-'] != "":
+#		args += ' -b ' + icv_options['-icv-build-']
+#	if icv_options['-icv-platform-'] != "":
+#		args += ' -p ' + icv_options['-icv-platform-']
 	if icv_options['-icv-boot-']:
 		args += ' -bs'
 	if icv_options['-icv-docs-']:
@@ -244,8 +265,8 @@ def main():
 	while True:             # Event Loop
 		event, values = window.read()
 		cmd_args = " "
-#		print("Event = ", event)
-#		print("Values=", values)
+		print("Event = ", event)
+	#	print("Values=", values)
 
 		if event in (sg.WIN_CLOSED, 'Exit', 'Close'):
 			break
@@ -267,8 +288,8 @@ def main():
 			print(which_tab)
 			if which_tab == "-TST-":
 				cmd_args = get_test_options(values)
-			elif which_tab == "-ICV-":
-				cmd_args = get_icv_options(values)
+#			elif which_tab == "-ICV-":
+#				cmd_args = get_icv_options(values)
 			elif which_tab == "-SRV-":
 				cmd_args = get_srv_options(values)
 			elif which_tab == "-OEM-":
