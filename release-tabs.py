@@ -12,17 +12,18 @@ font = ('Helvetica',14)
 
 sg.theme('Dark Blue 2')
 sg.set_options(font=font)
+sg.show_debugger_window(location=(10,10))
 
 build_options = ['help', 'release', 'r-mode-3']
 
 icv_layout = [
 			  [
 				sg.Text('build   '),
-#				sg.Input("",size=(12,1), key='-icv-build-'),
-#			    sg.Text('platform')
-#			    sg.Input("",
-# 						size=(22,1), key='-icv-platform-',
-# 						enable_events=True)
+				sg.Input("",size=(12,1), key='-icv-build-'),
+			    sg.Text('platform'),
+			    sg.Input("",
+ 						size=(22,1), key='-icv-platform-',
+ 						enable_events=True)
 			  ],
 			  [
 				sg.Checkbox('clean',  key='-icv-clean-',default=False),
@@ -32,11 +33,11 @@ icv_layout = [
 				sg.Checkbox('prov',   key='-icv-prov-', default=True),
 				sg.Checkbox('time',   key='-icv-time-', default=False),
 				sg.Checkbox('spell',  key='-icv-spell-',default=True),
-				sg.Checkbox('tar',    key='-icv-tar-',  default=False)
+				sg.Checkbox('tar',    key='-icv-tar-',  default=False),
+				sg.Checkbox('hexon',  key='-icv-hexon-',default=False),
+				sg.Checkbox('manoff', key='-icv-manoff-',default=False)
 			  ],
 			  [
-				sg.Checkbox('hexon',  key='-icv-hexon-',default=False),
-				sg.Checkbox('manoff', key='-icv-manoff-',default=False),
 				sg.Checkbox('release',key='-icv-release-',default=False),
 				sg.Checkbox('version',key='-icv-version-',default=False)
 			  ]
@@ -93,11 +94,11 @@ test_release_layout = [
 tab_group_layout = [[sg.Tab('ALIF (ICV)',
 						    icv_layout,
 						    key='-ICV-',
-						    font='Courier 15',
 						    border_width=15,
 						    tooltip='ICV Release'),
 					 sg.Tab('Application (OEM)',
-						    oem_layout,key='-OEM-',
+						    oem_layout,
+						    key='-OEM-',
 						    tooltip='APP release'),
 					 sg.Tab('Service (SRV)',
 						    srv_layout,
@@ -105,9 +106,12 @@ tab_group_layout = [[sg.Tab('ALIF (ICV)',
 					 sg.Tab('REV_B0 Bringup',
 						    test_release_layout,
 						    key='-TST-'),
+				     ],
+					 [
 					 sg.Button('Close'),
 					 sg.Button('Run')
-				   ]]
+				     ]
+				  ]
 
 # TAB Menu options for each tool
 tab_keys = ('-ICV-', '-OEM-', '-SRV-', '-TST-')
@@ -215,12 +219,12 @@ def get_icv_options(icv_options):
 	args = ''
 #	print(type(icv_options))
 
-	return args
-
-#	if icv_options['-icv-build-'] != "":
-#		args += ' -b ' + icv_options['-icv-build-']
-#	if icv_options['-icv-platform-'] != "":
-#		args += ' -p ' + icv_options['-icv-platform-']
+#	return args
+	
+	if icv_options['-icv-build-'] != "":
+		args += ' -b ' + icv_options['-icv-build-']
+	if icv_options['-icv-platform-'] != "":
+		args += ' -p ' + icv_options['-icv-platform-']
 	if icv_options['-icv-boot-']:
 		args += ' -bs'
 	if icv_options['-icv-docs-']:
@@ -237,16 +241,16 @@ def get_icv_options(icv_options):
 		args += ' -ts'
 	if icv_options['-icv-spell-']:
 		args += ' -c'
-	if icv_options['-icv-release-']:
-		args += ' -r'
+#	if icv_options['-icv-release-']:
+#		args += ' -r'
 	if icv_options['-icv-manoff-']:
 		args += ' -mo'
 	if icv_options['-icv-hexon-']:
 		args += ' -hx'
 	if icv_options['-icv-suppress-']:
 		args += ' -zb'
-	if icv_options['-icv-version-']:
-		args += ' -v'
+#	if icv_options['-icv-version-']:
+#		args += ' -v'
 
 	return args
 
@@ -285,18 +289,20 @@ def main():
 			 window[tab_keys[int(values['-IN-'])-1]].update(disabled=True)
 		if event == 'Run':
 			which_tab = values['-TABGROUP-']
-			print(which_tab)
+			print("Which Tab: ", which_tab)
 			if which_tab == "-TST-":
 				cmd_args = get_test_options(values)
-#			elif which_tab == "-ICV-":
+			elif which_tab == "-ICV-":
 #				cmd_args = get_icv_options(values)
+				print("Process ICV..")
 			elif which_tab == "-SRV-":
 				cmd_args = get_srv_options(values)
 			elif which_tab == "-OEM-":
 				cmd_args = get_oem_options(values)
 			else:
 				print("[ERROR] Unkown TAB")
-			runCommand(cmd=run_script + cmd_args, window=window)
+			if cmd_args != '':
+				runCommand(cmd=run_script + cmd_args, window=window)
 
 	window.close()
 
