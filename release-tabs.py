@@ -4,26 +4,25 @@
 
 import subprocess
 import sys
+import logging
 import PySimpleGUI as sg
 from PySimpleGUI.PySimpleGUI import theme_border_width
-from certifi.__main__ import args
 
 font = ('Helvetica',14)
 
 sg.theme('Dark Blue 2')
 sg.set_options(font=font)
-sg.show_debugger_window(location=(10,10))
+#sg.show_debugger_window(location=(10,10))
 
 build_options = ['help', 'release', 'r-mode-3']
 
 icv_layout = [
 			  [
 				sg.Text('build   '),
-				sg.Input("",size=(12,1), key='-icv-build-'),
+				sg.Input("B0",size=(12,1), key='-icv-build-',
+						enable_events=True),
 			    sg.Text('platform'),
-			    sg.Input("",
- 						size=(22,1), key='-icv-platform-',
- 						enable_events=True)
+			    sg.Input("EVALUATION_BOARD",size=(22,1), key='-icv-platform-')
 			  ],
 			  [
 				sg.Checkbox('clean',  key='-icv-clean-',default=False),
@@ -35,7 +34,8 @@ icv_layout = [
 				sg.Checkbox('spell',  key='-icv-spell-',default=True),
 				sg.Checkbox('tar',    key='-icv-tar-',  default=False),
 				sg.Checkbox('hexon',  key='-icv-hexon-',default=False),
-				sg.Checkbox('manoff', key='-icv-manoff-',default=False)
+				sg.Checkbox('manoff', key='-icv-manoff-',default=False),
+				sg.Checkbox('suppress',key='-icv-suppress-',default=False),
 			  ],
 			  [
 				sg.Checkbox('release',key='-icv-release-',default=False),
@@ -124,6 +124,9 @@ script_dict = {
 		'-SRV-' : "bash host-services.sh"
 		}
 
+def remove_control_characters(str):
+    return rx.sub(r'\p{C}', '', 'my-string')
+
 def determine_tab(tab_selection, tab_options):
 	"""
 		see which TAB is selected - this could be done better
@@ -141,7 +144,7 @@ def get_test_options(tst_options):
 		TST TAB selected - extract the options
 	"""
 	args = ''
-	print(type(tst_options))
+#	print(type(tst_options))
 #	print("TST Options= ", tst_options)
 
 	if tst_options['-test-time-']:
@@ -218,9 +221,8 @@ def get_icv_options(icv_options):
 	"""
 	args = ''
 #	print(type(icv_options))
+#	print("icv-options ", icv_options)
 
-#	return args
-	
 	if icv_options['-icv-build-'] != "":
 		args += ' -b ' + icv_options['-icv-build-']
 	if icv_options['-icv-platform-'] != "":
@@ -241,18 +243,20 @@ def get_icv_options(icv_options):
 		args += ' -ts'
 	if icv_options['-icv-spell-']:
 		args += ' -c'
-#	if icv_options['-icv-release-']:
-#		args += ' -r'
+	if icv_options['-icv-release-']:
+		args += ' -r'
 	if icv_options['-icv-manoff-']:
 		args += ' -mo'
 	if icv_options['-icv-hexon-']:
 		args += ' -hx'
 	if icv_options['-icv-suppress-']:
 		args += ' -zb'
-#	if icv_options['-icv-version-']:
-#		args += ' -v'
+	if icv_options['-icv-version-']:
+		args += ' -v'
 
 	return args
+
+valid_tabs = ["-TST-", "-ICV-", "-SRV-",  "-OEM-"]
 
 def main():
 	layout = [
@@ -260,9 +264,9 @@ def main():
 						   background_color='black', 
 						   text_color='white')],
 				[sg.TabGroup(tab_group_layout,
-				           enable_events=True,
 				           size=(900,146),
-				           key='-TABGROUP-')]
+				           key='-TABGROUP-')
+				]
              ]
 	window = sg.Window("ALIF SE Release Builder", layout, finalize=True,)
 	print("about to loop..")
@@ -270,7 +274,7 @@ def main():
 		event, values = window.read()
 		cmd_args = " "
 		print("Event = ", event)
-	#	print("Values=", values)
+#		print("Values=", values)
 
 		if event in (sg.WIN_CLOSED, 'Exit', 'Close'):
 			break
@@ -279,6 +283,7 @@ def main():
 		if event == '-TABGROUP-':
 			run_script = determine_tab(event,values)
 			print("Which group ", values[event])
+			print("runscript   ", run_script)
 		if event == 'Visible':
 			 window[tab_keys[int(values['-IN-'])-1]].update(visible=False)
 		if event == 'Invisible':
@@ -290,19 +295,23 @@ def main():
 		if event == 'Run':
 			which_tab = values['-TABGROUP-']
 			print("Which Tab: ", which_tab)
-			if which_tab == "-TST-":
-				cmd_args = get_test_options(values)
-			elif which_tab == "-ICV-":
-#				cmd_args = get_icv_options(values)
-				print("Process ICV..")
-			elif which_tab == "-SRV-":
-				cmd_args = get_srv_options(values)
-			elif which_tab == "-OEM-":
-				cmd_args = get_oem_options(values)
-			else:
-				print("[ERROR] Unkown TAB")
-			if cmd_args != '':
+
+			if which_tab in valid_tabs:
+				run_script = script_dict.get(which_tab)
+				if which_tab == "-TST-":
+					cmd_args = get_test_options(values)
+				elif which_tab == "-ICV-":
+					cmd_args = get_icv_options(values)
+				elif which_tab == "-SRV-":
+					cmd_args = get_srv_options(values)
+				elif which_tab == "-OEM-":
+					cmd_args = get_oem_options(values)
+				else:
+				    print("[ERROR] Unkown TAB")
+#				print("EXE=", (run_script+cmd_args))
 				runCommand(cmd=run_script + cmd_args, window=window)
+			else:
+				print("[ERROR] Invalid TAB")
 
 	window.close()
 
@@ -349,4 +358,9 @@ def runCommand(cmd, timeout=None, window=None):
 	return (retval, output)
 
 if __name__ == '__main__':
+	logging.basicConfig(level=logging.DEBUG,
+                        format='%(message)s',
+                        filemode='w')
+	logger=logging.getLogger(__name__)
+
 	main()
