@@ -91,7 +91,8 @@ test_release_layout = [
 			]
 
 # TAB menu layout
-tab_group_layout = [[sg.Tab('ALIF (ICV)',
+tab_group_layout = [
+					[sg.Tab('ALIF (ICV)',
 						    icv_layout,
 						    key='-ICV-',
 						    border_width=15,
@@ -268,7 +269,9 @@ def main():
 				           key='-TABGROUP-')
 				]
              ]
-	window = sg.Window("ALIF SE Release Builder", layout, finalize=True,)
+	window = sg.Window("ALIF SE Release Builder", layout, 
+						finalize=True,
+						icon="alif-logo.ico").read(close=True)
 	print("about to loop..")
 	while True:             # Event Loop
 		event, values = window.read()
