@@ -289,7 +289,9 @@ def main():
 				[sg.TabGroup(tab_group_layout,
 				           size=(900,146),
 				           key='-TABGROUP-')
-				]
+				],
+				[sg.ProgressBar(100, orientation='h', 
+							size=(80,20), key='-PROG-')]
              ]
 	window = sg.Window("ALIF SE Release Builder", 
 					    layout, 
@@ -361,6 +363,8 @@ def runCommand(cmd, timeout=None, window=None):
 #		print("Line ", type(line))
 		output += line
 		print(line)
+#		sg.one_line_progress_meter('', counter, 100)
+
 		window.refresh() if window else nop        # yes, a 1-line if, so shoot me
 
 	retval = p.wait(timeout)
