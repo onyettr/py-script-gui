@@ -259,6 +259,28 @@ def get_icv_options(icv_options):
 
 valid_tabs = ["-TST-", "-ICV-", "-SRV-",  "-OEM-"]
 
+def processs_and_execute(values,window):
+	"""
+		Take the optins and EXEcute them
+	"""
+	which_tab = values['-TABGROUP-']
+	print("[DBG] Which Tab: ", which_tab)
+
+	if which_tab in valid_tabs:
+		run_script = script_dict.get(which_tab)
+		if which_tab == "-TST-":
+			cmd_args = get_test_options(values)
+		elif which_tab == "-ICV-":
+			cmd_args = get_icv_options(values)
+		elif which_tab == "-SRV-":
+			cmd_args = get_srv_options(values)
+		elif which_tab == "-OEM-":
+			cmd_args = get_oem_options(values)
+		else:
+			print("[ERROR] Unkown TAB")
+			print("[DBG] EXE string=", (run_script+cmd_args))
+		runCommand(cmd=run_script + cmd_args, window=window)
+
 def main():
 	layout = [
 				[sg.Output(size=(80,20), 
@@ -269,52 +291,35 @@ def main():
 				           key='-TABGROUP-')
 				]
              ]
-	window = sg.Window("ALIF SE Release Builder", layout, 
-						finalize=True,
-						icon="alif-logo.ico").read(close=True)
-	print("about to loop..")
-	while True:             # Event Loop
-		event, values = window.read()
-		cmd_args = " "
-		print("Event = ", event)
-#		print("Values=", values)
+	window = sg.Window("ALIF SE Release Builder", 
+					    layout, 
+						finalize=True)
+#						icon="alif-logo.ico").read(close=True)
+	print("[DBG] about to loop..")
+	try:
+		while True:             # Event Loop
+			event, values = window.read()
+			cmd_args = " "
+			print("[DBG] Event = ", event)
+#			print("Values=", values)
 
-		if event in (sg.WIN_CLOSED, 'Exit', 'Close'):
-			break
-		if event == 'Close':
-			break
-		if event == '-TABGROUP-':
-			run_script = determine_tab(event,values)
-			print("Which group ", values[event])
-			print("runscript   ", run_script)
-		if event == 'Visible':
-			 window[tab_keys[int(values['-IN-'])-1]].update(visible=False)
-		if event == 'Invisible':
-			 window[tab_keys[int(values['-IN-'])-1]].update(visible=True)
-		if event == 'Select':
-			 window[tab_keys[int(values['-IN-'])-1]].select()
-		if event == 'Disable':
-			 window[tab_keys[int(values['-IN-'])-1]].update(disabled=True)
-		if event == 'Run':
-			which_tab = values['-TABGROUP-']
-			print("Which Tab: ", which_tab)
-
-			if which_tab in valid_tabs:
-				run_script = script_dict.get(which_tab)
-				if which_tab == "-TST-":
-					cmd_args = get_test_options(values)
-				elif which_tab == "-ICV-":
-					cmd_args = get_icv_options(values)
-				elif which_tab == "-SRV-":
-					cmd_args = get_srv_options(values)
-				elif which_tab == "-OEM-":
-					cmd_args = get_oem_options(values)
-				else:
-				    print("[ERROR] Unkown TAB")
-#				print("EXE=", (run_script+cmd_args))
-				runCommand(cmd=run_script + cmd_args, window=window)
+			if event in (sg.WIN_CLOSED, 'Exit', 'Close'):
+				break
+			if event == 'Close':
+				break
+			if event == '-TABGROUP-':
+				run_script = determine_tab(event,values)
+				print("[DBG] Which group ", values[event])
+				print("[DBG] runscript   ", run_script)
+			if event == 'Run':
+				processs_and_execute(values,window)
 			else:
 				print("[ERROR] Invalid TAB")
+	except Exception as e:
+		sg.Print('Exception in my event loop for the program:', 
+				sg.__file__, e, 
+				keep_on_top=True, wait=True)
+		sg.popup_error_with_traceback('Problem in my event loop!', e)
 
 	window.close()
 
@@ -347,11 +352,13 @@ def runCommand(cmd, timeout=None, window=None):
 	print("[INFO] Commandline: ", cmd)
 
 	p = subprocess.Popen(cmd, 
-						 shell=True, stdout=subprocess.PIPE, 
+						 shell=True, 
+						 stdout=subprocess.PIPE, 
 						 stderr=subprocess.STDOUT)
 	output = ''
 	for line in p.stdout:
 		line = line.decode(errors='replace' if (sys.version_info) < (3, 5) else 'backslashreplace').rstrip()
+#		print("Line ", type(line))
 		output += line
 		print(line)
 		window.refresh() if window else nop        # yes, a 1-line if, so shoot me
