@@ -5,6 +5,8 @@
 import subprocess
 import sys
 import logging
+import queue
+import threading
 import PySimpleGUI as sg
 from PySimpleGUI.PySimpleGUI import theme_border_width
 
@@ -13,6 +15,21 @@ font = ('Helvetica',14)
 sg.theme('Dark Blue 2')
 sg.set_options(font=font)
 #sg.show_debugger_window(location=(10,10))
+
+log_file = 'run_log.txt'
+debug_log = False
+
+# Logging setup to send one format of logs to a log file and one to stdout:
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(name)s, %(asctime)s, [%(levelname)s], %(message)s',
+    filename=log_file,
+    filemode='w')
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+ch.setFormatter(logging.Formatter('%(name)s, [%(levelname)s], %(message)s'))
+logging.getLogger('').addHandler(ch)
 
 build_options = ['help', 'release', 'r-mode-3']
 
@@ -110,7 +127,8 @@ tab_group_layout = [
 				     ],
 					 [
 					 sg.Button('Close'),
-					 sg.Button('Run')
+					 sg.Button('Run'),
+					 sg.Button("Debug")
 				     ]
 				  ]
 
@@ -260,8 +278,9 @@ def get_icv_options(icv_options):
 valid_tabs = ["-TST-", "-ICV-", "-SRV-",  "-OEM-"]
 
 def processs_and_execute(values,window):
-	"""
-		Take the optins and EXEcute them
+	""" Take the optins and EXEcute them
+	@params values 
+	#params winfow
 	"""
 	which_tab = values['-TABGROUP-']
 	print("[DBG] Which Tab: ", which_tab)
@@ -282,6 +301,8 @@ def processs_and_execute(values,window):
 		runCommand(cmd=run_script + cmd_args, window=window)
 
 def main():
+	global debug_log
+
 	layout = [
 				[sg.Output(size=(80,20), 
 						   background_color='black', 
@@ -297,6 +318,9 @@ def main():
 					    layout, 
 						finalize=True)
 #						icon="alif-logo.ico").read(close=True)
+	
+	appStarted = False
+
 	print("[DBG] about to loop..")
 	try:
 		while True:             # Event Loop
@@ -307,14 +331,22 @@ def main():
 
 			if event in (sg.WIN_CLOSED, 'Exit', 'Close'):
 				break
+			if event == 'Debug':
+				debug_log = not debug_log
+				print(debug_log)
 			if event == 'Close':
 				break
 			if event == '-TABGROUP-':
 				run_script = determine_tab(event,values)
-				print("[DBG] Which group ", values[event])
-				print("[DBG] runscript   ", run_script)
+				if debug_log:
+					logging.info("[DBG] Which group {}".format(values[event]))
+#				print("[DBG] runscript   ", run_script)
 			if event == 'Run':
+				if debug_log:
+					logging.info('[WIN] Run')
 				processs_and_execute(values,window)
+			elif event == 'Debug':
+				pass
 			else:
 				print("[ERROR] Invalid TAB")
 	except Exception as e:
@@ -330,6 +362,7 @@ def execute_command_blocking(command, *args):
     for a in args:
         expanded_args.append(a)
         # expanded_args += a
+
     print("Running %s %s" %(command, expanded_args))
     try:
         sp = subprocess.Popen([command, expanded_args], shell=True,
@@ -351,7 +384,7 @@ def runCommand(cmd, timeout=None, window=None):
 	@param window: the PySimpleGUI window that the output is going to (needed to do refresh on)
 	@return: (return code from command, command output)
 	"""
-	print("[INFO] Commandline: ", cmd)
+	logging.info('Exec cmdline %s',cmd)
 
 	p = subprocess.Popen(cmd, 
 						 shell=True, 
@@ -372,9 +405,9 @@ def runCommand(cmd, timeout=None, window=None):
 	return (retval, output)
 
 if __name__ == '__main__':
-	logging.basicConfig(level=logging.DEBUG,
-                        format='%(message)s',
-                        filemode='w')
-	logger=logging.getLogger(__name__)
+#	logging.basicConfig(level=logging.DEBUG,
+#                        format='%(message)s',
+#                        filemode='w')
+#	logger=logging.getLogger(__name__)
 
 	main()
